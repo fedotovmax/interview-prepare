@@ -1,0 +1,21 @@
+package main
+
+import "fmt"
+
+func main() {
+	a := []int{1, 2, 3}
+
+	b := []int{4, 5, 6}
+
+	c := make([]int, 3)
+	fmt.Println("c", c) // c [0 0 0]
+	copy(c, b)
+
+	fmt.Println(a) // [1 2 3]
+
+	clear(a)
+
+	fmt.Println(a) // [0 0 0]
+	fmt.Println("c", c) // c [4 5 6]
+
+}

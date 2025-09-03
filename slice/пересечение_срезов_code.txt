@@ -1,0 +1,35 @@
+package main
+
+import "fmt"
+
+func intersection(a, b []int) []int {
+	cache := make(map[int]bool)
+
+	result := []int{}
+
+	for _, val := range a {
+		if _, ok := cache[val]; !ok {
+			cache[val] = true
+		}
+	}
+
+	for _, val := range b {
+		if _, ok := cache[val]; ok {
+			result = append(result, val)
+		}
+	}
+
+	return result
+
+}
+
+func main() {
+	a := []int{23, 3, 1, 2, 5}
+	b := []int{6, 2, 4, 23, 5}
+
+	// [2, 23]
+
+	r := intersection(a, b)
+
+	fmt.Println(r)
+}

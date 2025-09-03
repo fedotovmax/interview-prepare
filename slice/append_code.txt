@@ -1,0 +1,48 @@
+package main
+
+import "fmt"
+
+func process1(a []int) {
+	a[2] = 5
+}
+
+func process2(a []int) {
+	a = append(a, 6) // здесь переполнится cap, и будет перевыделение памяти, т.к. мы не используем срез, его съест GC
+}
+
+func main() {
+	a := []int{1, 2, 3, 4} // len 4, cap 4
+
+	fmt.Println("initial", a) // initial [1 2 3 4]
+	process1(a)
+	fmt.Println("after p1", a) // after p1 [1 2 5 4]
+	process2(a)
+	fmt.Println("after p2", a) // after p2 [1 2 5 4]
+
+}
+
+
+
+================================================
+
+
+func process1(a []int) {
+	a[2] = 5
+}
+
+func process2(a []int) {
+	a = append(a, 6) 
+}
+
+func main() {
+	//a := []int{1, 2, 3, 4}
+	a := make([]int, 3, 6)
+
+	fmt.Println("initial", a) // initial [0 0 0]
+	process1(a)
+	fmt.Println("after p1", a) // after p1 [0 0 5]
+	process2(a)
+	fmt.Println("after p2", a) // after p2 [0 0 5]
+
+	fmt.Println("resize hack", a[:4]) // resize hack [0 0 5 6]
+}
