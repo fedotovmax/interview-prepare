@@ -1,0 +1,30 @@
+package main
+
+import "fmt"
+
+func mutate1(m map[string]int) {
+	m["Max"] = 21
+}
+
+func mutate2(m map[string]int) {
+	m = map[string]int{"Max": 123} // В Go все копируется (передается по значению), поэтому
+	// в первой и второй функции мы имеем две копии указателей на одну структуру.
+}
+
+func main() {
+
+	m := make(map[string]int)
+
+	m["Max"] = 1
+
+	fmt.Println(m) //map[Max:1]
+
+	mutate1(m)
+
+	fmt.Println(m) // map[Max:21]
+
+	mutate2(m)
+
+	fmt.Println(m) // map[Max:21]
+
+}

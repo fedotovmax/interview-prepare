@@ -1,0 +1,52 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+)
+
+func main() {
+	const N = 5
+
+	m := make(map[int]int)
+	var mu sync.RWMutex
+	var wg sync.WaitGroup
+
+	// Запускаем N писателей
+	wg.Add(N)
+	for i := 0; i < N; i++ {
+		go func() {
+			defer wg.Done()
+			value := rand.Intn(100)
+			mu.Lock() // блокируем на запись
+			m[i] = value
+			mu.Unlock()
+			fmt.Printf("Writer %d wrote: m[%d] = %d\n", i, i, value)
+
+		}()
+	}
+
+	wg.Wait()
+
+	wg.Add(N)
+	// Запускаем N читателей
+	for i := 0; i < N; i++ {
+		go func() {
+			defer wg.Done()
+
+			mu.RLock() // блокируем только на чтение
+			value, ok := m[i]
+			mu.RUnlock()
+			if ok {
+				fmt.Printf("Reader %d read: m[%d] = %d\n", i, i, value)
+			} else {
+				fmt.Printf("Reader %d: m[%d] not found\n", i, i)
+			}
+		}()
+	}
+
+	wg.Wait()
+	fmt.Println("Finished")
+	fmt.Println(m)
+}
