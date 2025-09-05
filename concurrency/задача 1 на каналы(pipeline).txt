@@ -1,0 +1,51 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+/*
+Написать 3 функции:
+  1. writer - генерирует числа 1 до 10
+  2. doubler - умножает числа на 2, имитирует долгую работу (500мс)
+  3. reader - читает данные и выводит
+*/
+
+func writer() <-chan int {
+
+	ch := make(chan int)
+
+	go func() {
+		for value := range 10 {
+			ch <- value + 1
+		}
+		close(ch)
+	}()
+
+	return ch
+}
+
+func doubler(ch <-chan int) <-chan int {
+	resultCh := make(chan int)
+
+	go func() {
+		for value := range ch {
+			time.Sleep(500 * time.Millisecond)
+			resultCh <- value * 2
+		}
+		close(resultCh)
+	}()
+
+	return resultCh
+}
+
+func reader(ch <-chan int) {
+	for value := range ch {
+		fmt.Println(value)
+	}
+}
+
+func main() {
+	reader(doubler(writer()))
+}
