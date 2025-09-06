@@ -1,0 +1,84 @@
+Индекс — это структура данных, которая позволяет базе данных быстрее и эффективнее находить и извлекать информацию из таблиц.
+Индексы работают аналогично оглавлениям в книгах, указывая на местоположение определенных данных
+и обеспечивая быстрый доступ к ним. Цель использования индексов заключается в сокращении времени обработки запросов
+и уменьшении нагрузки на систему.
+
+
+1. B-tree (сбалансированное дерево) — это самый распространенный тип индекса в PostgreSQL.
+Он поддерживает все стандартные операции сравнения (>, <, >=, <=, =, !=) и может использоваться с большинством типов данных.
+B-tree индексы могут быть использованы для сортировки, ограничений уникальности и поиска по диапазону значений.
+
+-- CREATE INDEX ix_example_btree ON example_table (column_name);
+
+2. Hash-индексы предназначены для обеспечения быстрого доступа к данным по равенству.
+Они менее эффективны, чем B-tree индексы, и не поддерживают сортировку или поиск по диапазону значений.
+Из-за своих ограничений, Hash-индексы редко используются на практике.
+
+-- CREATE INDEX ix_example_hash ON example_table USING hash (column_name);
+
+3. GiST (Generalized Search Tree) - индексы являются обобщенными и многоцелевыми, предназначены для работы с сложными типами данных,
+такими как геометрические объекты, текст и массивы. Они позволяют быстро выполнять поиск по пространственным,
+текстовым и иерархическим данным.
+
+-- CREATE INDEX ix_example_gist ON example_table USING gist (to_tsvector('english', column_name));
+
+4. SP-GiST (Space-Partitioned Generalized Search Tree) - индексы предназначены для работы с непересекающимися
+и неравномерно распределенными данными. Они эффективны для поиска в геометрических и IP-адресных данных.
+
+-- CREATE INDEX ix_example_spgist ON example_table USING spgist (inet(column_name));
+
+5. GIN (Generalized Inverted Index) - GIN-индексы применяются для полнотекстового поиска и поиска по массивам, JSON и триграммам.
+Они обеспечивают высокую производительность при поиске в больших объемах данных.
+
+-- CREATE INDEX ix_example_gin ON example_table USING gin (to_tsvector('english', column_name));
+
+6. BRIN (Block Range Index) - индексы используются для компактного представления больших объемов данных,
+особенно когда значения в таблице имеют определенный порядок.
+Они эффективны для хранения и обработки временных рядов и географических данных.
+
+-- CREATE INDEX ix_example_brin ON example_table USING brin (column_name);
+
+Индексы являются отличным инструментом для оптимизации операций чтения, 
+но следуюет учитывать, что при ВСТАВКЕ, ОБНОВЛЕНИИ и УДАЛЕНИИ данных, индексы также должны
+быть обновлены, что может привести к дополнительным затратам ресурсов.
+
+=== Примеры использования.
+
+Соц. сеть 
+
+CREATE TABLE friendships (
+  user_id INT NOT NULL,
+  friend_id INT NOT NULL,
+  since_date DATE NOT NULL,
+  PRIMARY KEY (user_id, friend_id)
+);
+
+CREATE INDEX ix_friendships_user_id ON friendships (user_id);
+CREATE INDEX ix_friendships_friend_id ON friendships (friend_id);
+
+Индексы ускорят поиск друзей по `user_id` и `friend_id`.
+
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  customer_id INT NOT NULL,
+  order_date DATE NOT NULL,
+  status VARCHAR(15) NOT NULL
+);
+
+CREATE INDEX ix_orders_customer_id ON orders (customer_id);
+CREATE INDEX ix_orders_order_date ON orders (order_date);
+CREATE INDEX ix_orders_status ON orders (status);
+
+Индексы ускорят поиск заказов по `customer_id`, `order_date` и `status`.
+
+
+======
+
+Для поиска на точное совпадение (= или !=) hash индексы эффективнее.
+
+B-Tree лучше использовать для поиска данных в диапазоне, сортировках
+
+Полнотекстовый поиск — автоматизированный поиск документов, при котором поиск ведётся не по именам документов,
+а по их содержимому, всему или существенной части. (GIN index)
+
+
